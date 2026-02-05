@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTH Three-Day ROR Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <!-- Login Page -->
+        <div id="loginPage" class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+                DTH Three-Day ROR Calculator
+            </h1>
+            <p class="text-gray-600 text-center mb-6">Please login to continue</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Username
+                    </label>
+                    <input
+                        type="text"
+                        id="username"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter username"
+                    />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter password"
+                    />
+                </div>
+                
+                <p id="loginError" class="text-sm text-red-600 font-semibold text-center hidden">
+                    ⚠️ Invalid username or password
+                </p>
+                
+                <button
+                    onclick="handleLogin()"
+                    class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
+                >
+                    Login
+                </button>
+            </div>
+        </div>
+
+        <!-- Calculator Page -->
+        <div id="calculatorPage" class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full hidden">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+                DTH Three-Day ROR Calculator
+            </h1>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Rate Change ($)
+                    </label>
+                    <p class="text-xs text-gray-500 mb-2">
+                        Enter a positive value for rate increase and a negative value for rate decrease
+                    </p>
+                    <input
+                        type="number"
+                        step="0.01"
+                        id="rateChange"
+                        oninput="handleRateChange()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter rate change (e.g., -5 or 3)"
+                    />
+                    <p id="rateError" class="mt-2 text-sm text-red-600 font-semibold hidden">
+                        ⚠️ Rate Decrease above cap (Max: -$6.00)
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Equipment Giveaway ($)
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        id="equipmentGiveaway"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Enter equipment value"
+                    />
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mb-6">
+                <button
+                    onclick="calculateOffer()"
+                    class="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
+                >
+                    Calculate
+                </button>
+                <button
+                    onclick="resetForm()"
+                    class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+                >
+                    Reset
+                </button>
+            </div>
+            
+            <div id="result" class="mt-6 p-4 rounded-lg bg-gray-50 border-2 border-gray-200 hidden">
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600">Total Value:</p>
+                    <p id="totalValue" class="text-2xl font-bold text-gray-800"></p>
+                </div>
+                
+                <div id="offerStatus" class="p-4 rounded-lg">
+                    <p id="offerMessage" class="text-lg font-semibold text-center"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Login functionality
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            
+            if (username === 'Voziq' && password === 'Brinks') {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('calculatorPage').classList.remove('hidden');
+                loginError.classList.add('hidden');
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        // Rate change validation
+        function handleRateChange() {
+            const rateInput = document.getElementById('rateChange');
+            const rateError = document.getElementById('rateError');
+            const rate = parseFloat(rateInput.value);
+            
+            if (rate < -6) {
+                rateError.classList.remove('hidden');
+                rateInput.classList.add('border-red-500', 'bg-red-50');
+                rateInput.classList.remove('border-gray-300');
+            } else {
+                rateError.classList.add('hidden');
+                rateInput.classList.remove('border-red-500', 'bg-red-50');
+                rateInput.classList.add('border-gray-300');
+            }
+        }
+
+        // Calculate offer
+        function calculateOffer() {
+            const rate = parseFloat(document.getElementById('rateChange').value) || 0;
+            const equipment = parseFloat(document.getElementById('equipmentGiveaway').value) || 0;
+            
+            // Don't calculate if rate decrease is below -6
+            if (rate < -6) {
+                return;
+            }
+            
+            let totalValue;
+            // If rate is negative (rate decrease), formula: Equipment - (35 * Rate Change)
+            // If rate is positive (rate increase), formula: Equipment - (8 * Rate Change)
+            if (rate < 0) {
+                totalValue = equipment - (35 * rate);
+            } else {
+                totalValue = equipment - (8 * rate);
+            }
+            
+            const canPresent = totalValue <= 500;
+            
+            // Display result
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('totalValue').textContent = '$' + totalValue.toFixed(2);
+            
+            const offerStatus = document.getElementById('offerStatus');
+            const offerMessage = document.getElementById('offerMessage');
+            
+            if (canPresent) {
+                offerStatus.className = 'p-4 rounded-lg bg-green-100 border-2 border-green-400';
+                offerMessage.className = 'text-lg font-semibold text-center text-green-800';
+                offerMessage.textContent = '✓ Offer can be presented';
+            } else {
+                offerStatus.className = 'p-4 rounded-lg bg-red-100 border-2 border-red-400';
+                offerMessage.className = 'text-lg font-semibold text-center text-red-800';
+                offerMessage.textContent = '✗ Offer cannot be presented';
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('rateChange').value = '';
+            document.getElementById('equipmentGiveaway').value = '';
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('rateError').classList.add('hidden');
+            
+            const rateInput = document.getElementById('rateChange');
+            rateInput.classList.remove('border-red-500', 'bg-red-50');
+            rateInput.classList.add('border-gray-300');
+        }
+
+        // Allow Enter key to submit login
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
